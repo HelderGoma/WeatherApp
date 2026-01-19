@@ -6,6 +6,8 @@ const searchBtn = document.querySelector(".search button")
 const weatherIcon = document.querySelector(".weather-icon")
 
 
+
+
 async function checkWeather(city) {
     const response = await fetch(apiUrl + "&q=" + city + `&appid=${apiKey}`)
 
@@ -22,26 +24,41 @@ async function checkWeather(city) {
         document.querySelector(".humidity").innerHTML = data.main.humidity + "%"
         document.querySelector(".wind").innerHTML = data.wind.speed + "km/h"
 
-        if (data.weather[0].main == "Clouds") {
-            weatherIcon.src = "./images/clouds.png"
-        } else if (data.weather[0].main == "Rain") {
-            weatherIcon.src = "./images/rain.png"
-        } else if (data.weather[0].main == "Clear") {
-            weatherIcon.src = "./images/clear.png"
-        } else if (data.weather[0].main == "Mist") {
-            weatherIcon.src = "./images/mist.png"
-        } else if (data.weather[0].main == "Drizzle") {
-            weatherIcon.src = "./images/drizzle.png"
-        } else if (data.weather[0].main == "Snow") {
-            weatherIcon.src = "./images/snow.png"
-        } else if (data.weather[0].time == "Thunderstorm") {
-            weatherIcon.src = "./images/thunderstorm.png"
-        }
+
 
         document.querySelector(".weather").style.display = "block"
         document.querySelector(".error").style.display = "none"
 
+
+        const { sunrise, sunset } = data.sys;
+        const { timezone } = data;
+
+        const nowUtc = Math.floor(Date.now() / 1000);
+
+        const localNow = nowUtc + timezone;
+        const localSunrise = sunrise + timezone;
+        const localSunset = sunset + timezone;
+
+        const isNight = localNow < localSunrise || localNow > localSunset;
+
+        const weatherMain = data.weather[0].main.toLowerCase();
+        const timeSuffix = isNight ? "-night" : "";
+
+        changeIconSmoothly(`./images/${weatherMain}${timeSuffix}.png`);
+
+        const card = document.getElementById('card');
+        if (card) {
+            card.classList.toggle('night', isNight);
+            card.classList.toggle('day', !isNight);
+        }
+
+
+        document.body.classList.toggle('night-bg', isNight);
+        document.body.classList.toggle('day-bg', !isNight);
     }
+
+
+
 }
 
 
@@ -50,3 +67,13 @@ searchBtn.addEventListener("click", () => {
     checkWeather(searchBox.value)
 })
 
+
+
+function changeIconSmoothly(newSrc) {
+    weatherIcon.classList.add("fade");
+
+    setTimeout(() => {
+        weatherIcon.src = newSrc;
+        weatherIcon.classList.remove("fade");
+    }, 300);
+}
