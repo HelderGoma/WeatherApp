@@ -1,6 +1,8 @@
 const apiKey = "2f099a606477573b2f5e2d598baebecf"
 const apiUrl = "https://api.openweathermap.org/data/2.5/weather?units=metric"
 
+const form = document.querySelector(".search");
+
 const searchBox = document.querySelector(".search input")
 const searchBtn = document.querySelector(".search button")
 const weatherIcon = document.querySelector(".weather-icon")
@@ -61,13 +63,11 @@ async function checkWeather(city) {
 
 }
 
+form.addEventListener("submit", (e) => {
+    e.preventDefault();
 
-
-searchBtn.addEventListener("click", () => {
-    checkWeather(searchBox.value)
-})
-
-
+    checkWeather(searchBox.value);
+});
 
 function changeIconSmoothly(newSrc) {
     weatherIcon.classList.add("fade");
